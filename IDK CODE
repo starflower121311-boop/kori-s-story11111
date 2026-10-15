@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kori's Story</title>
+
+<style>
+* { box-sizing: border-box; }
+
+:root {
+    --background: #f7f7f7;
+    --panel: #fff;
+    --text: #303030;
+    --muted: #777;
+    --border: #bdbdbd;
+    --button: #eee;
+    --button-hover: #dedede;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 30px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--background);
+    color: var(--text);
+    font-family: Georgia, "Times New Roman", serif;
+    transition: background 2s, color 2s;
+}
+
+#game {
+    width: 100%;
+    max-width: 760px;
+    text-align: center;
+}
+
+#language-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 22px;
+}
+
+#language-toggle {
+    width: auto;
+    min-width: 125px;
+    padding: 9px 15px;
+    font-size: 12px;
+}
+
+#chapter {
+    margin-bottom: 12px;
+    color: var(--muted);
+    font: 11px Arial, sans-serif;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin: 0 0 25px;
+    font-size: clamp(27px, 5vw, 42px);
+    font-weight: normal;
+    letter-spacing: 2px;
+}
+
+#scene {
+    min-height: 200px;
+    padding: 24px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    box-shadow: 7px 7px 0 rgba(0,0,0,.06);
+    transition: background 2s, border-color 2s;
+}
+
+#image-frame {
+    width: min(100%, 440px);
+    margin: 0 auto 24px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    background: rgba(0,0,0,.025);
+}
+
+#scene-image {
+    display: block;
+    width: 100%;
+    max-height: 380px;
+    object-fit: contain;
+}
+
+#image-error {
+    display: none;
+    padding: 20px 8px;
+    color: #a33;
+    font: 13px Arial, sans-serif;
+    overflow-wrap: anywhere;
+}
+
+#story-text {
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.9;
+    font-size: 16px;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+#choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 480px;
+    margin: 24px auto 0;
+}
+
+button {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1px solid var(--border);
+    background: var(--button);
+    color: inherit;
+    font: 13px Arial, sans-serif;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+}
+
+button:hover:not(:disabled) {
+    background: var(--button-hover);
+    border-color: #777;
+}
+
+button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+#footer {
+    margin-top: 20px;
+    color: var(--muted);
+    font: 10px Arial, sans-serif;
+    letter-spacing: 2px;
+}
+
+body.corrupted {
+    --background: #090909;
+    --panel: #111;
+    --text: #e2e2e2;
+    --muted: #888;
+    --border: #555;
+    --button: #1b1b1b;
+    --button-hover: #333;
+}
+
+body.corrupted #scene {
+    box-shadow: 7px 7px 0 rgba(255,255,255,.035);
+}
+
+body.glitch #scene {
+    animation: glitch .16s infinite;
+}
+
+body.glitch #chapter {
+    color: #e0a0a0;
+}
+
+@keyframes glitch {
+    0% { transform: translate(0,0); }
+    25% { transform: translate(2px,-1px); }
+    50% { transform: translate(-2px,1px); }
+    75% { transform: translate(1px,2px); }
+    100% { transform: translate(0,0); }
+}
+
+body.gloomy {
+    --background: #292929;
+    --panel: #353535;
+    --text: #d0d0d0;
+    --muted: #a0a0a0;
+    --border: #666;
+    --button: #424242;
+    --button-hover: #555;
+}
+
+body.gloomy #scene {
+    box-shadow: 7px 7px 0 rgba(0,0,0,.18);
+}
+
+/* Arabic layout */
+
+body.arabic {
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+body.arabic #game {
+    direction: rtl;
+}
+
+body.arabic #language-bar {
+    justify-content: flex-start;
+}
+
+body.arabic #chapter {
+    letter-spacing: 0;
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+body.arabic h1 {
+    letter-spacing: 0;
+}
+
+body.arabic #story-text {
+    text-align: right;
+    line-height: 2;
+    font-size: 17px;
+}
+
+body.arabic #choices button {
+    text-align: right;
+}
+
+body.arabic #footer {
+    letter-spacing: 0;
+}
+
+@media (max-width: 500px) {
+    body {
+        padding: 18px 10px;
+        align-items: flex-start;
+    }
+
+    #scene {
+        padding: 16px;
+    }
+
+    #story-text {
+        font-size: 15px;
+    }
+
+    #image-frame {
+        margin-bottom: 18px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+</style>
+</head>
+
+<body>
+<main id="game">
+
+    <div id="language-bar">
+        <button id="language-toggle" type="button"
+                onclick="toggleLanguage()">العربية</button>
+    </div>
+
+    <div id="chapter">A STORY</div>
+    <h1 id="title">Kori's Story</h1>
+
+    <section id="scene" aria-live="polite">
+        <div id="image-frame">
+            <img id="scene-image" alt="" hidden>
+            <div id="image-error"></div>
+        </div>
+
+        <p id="story-text"></p>
+        <div id="choices"></div>
+    </section>
+
+    <div id="footer">KORI'S STORY</div>
+</main>
+
+<script>
+"use strict";
+
+/* ================================
+   LANGUAGE SUPPORT
+================================ */
+
+let language = "en";
+
+const arabic = {
+    "A STORY": "قصة",
+    "ACT 1": "الفصل الأول",
+    "ACT 2": "الفصل الثاني",
+    "ACT 3": "الفصل الثالث",
+    "ENDING 1": "النهاية الأولى",
+    "ENDING 2": "النهاية الثانية",
+
+    "Kori's Story": "قصة كوري",
+    "The Void": "الفراغ",
+    "A Familiar Stranger": "غريب مألوف",
+    "Something Feels Familiar": "شي مألوف",
+    "The Door": "الباب",
+    "A Weeping Figure": "شخص يبكي",
+    "An Offer": "عرض",
+    "Somewhere Familiar": "مكان مألوف",
+    "Explore": "استكشاف",
+    "One More Place": "مكان أخير",
+    "A Place to Remember": "مكان للذكريات",
+    "Peace": "السلام",
+    "The Truth": "الحقيقة",
+
+    "Look around": "تطالع حولها",
+    "Call out to someone": "تنادي أحد",
+    "Try to move around": "تحاول تتحرك",
+    "Speak to the cat": "تكلم القطة",
+    "Pet the cat": "تمسح على القطة",
+    "Watch its tail wag": "تراقب ذيلها وهو يتحرك",
+    "Stand still and listen": "توقف وتسمع",
+    "Chase after the cat": "تلحق القطة",
+    "Blink": "ترمش",
+    "Approach the door": "تقرب من الباب",
+    "Open the door": "تفتح الباب",
+    "Watch him quietly": "تراقبه بهدوء",
+    "Try asking him questions": "تحاول تسأله",
+    "Take his hands": "تمسك يدينه",
+    "Walk away": "تمشي وتتركه",
+    "Continue": "كمّلي",
+    "Visit the park": "تروح للحديقة العامة",
+    "Visit the garden": "تروح للحديقة",
+    "Visit the library": "تروح للمكتبة",
+    "Go with him": "تروح معه",
+    "Stay here": "تبقى هنا",
+    "Start over": "ابدئي من جديد",
+
+    "ENDING 1: PEACE": "النهاية الأولى: السلام",
+    "ENDING 2: THE TRUTH": "النهاية الثانية: الحقيقة",
+
+    "A girl stands in a place where nothing exists.":
+        "في بنت واقفة بمكان ما فيه أي شي.",
+    "She doesn't know how she got here.":
+        "ما تدري كيف وصلت لهالمكان.",
+    "She doesn't remember anything at all.":
+        "وما تتذكر أي شي أبد.",
+    "What should she do?":
+        "وش المفروض تسوي؟",
+
+    "Kori looks around.":
+        "كوري تطالع حولها.",
+    "There is nothing. No walls, no floor she can see, and no sign of another person.":
+        "ما فيه أي شي. لا جدران، ولا أرض واضحة، ولا أحد غيرها.",
+    "Then, something catches her attention.":
+        "وفجأة، شي يلفت انتباهها.",
+    "Kori calls out into the emptiness.":
+        "كوري تنادي وسط الفراغ.",
+    "No one answers.":
+        "ما أحد يرد عليها.",
+    "For a moment, she thinks she hears something nearby.":
+        "للحظة، تحس إنها سمعت صوت قريب منها.",
+    "Kori tries to move through the empty space.":
+        "كوري تحاول تمشي وسط المكان الفاضي.",
+    "She doesn't know where she is going.":
+        "ما تدري وين رايحة.",
+    "Then, she notices something in the distance.":
+        "وبعدين تلاحظ شي من بعيد.",
+    "A black cat sits quietly in front of her.":
+        "قطة سودا جالسة بهدوء قدامها.",
+
+    "The cat looks at Kori.":
+        "القطة تطالع كوري.",
+    "It doesn't seem frightened of her. It simply sits there, watching.":
+        "ما يبين عليها إنها خايفة منها. بس جالسة وتطالعها.",
+    "Kori tries speaking to the cat.":
+        "كوري تحاول تكلم القطة.",
+    "It doesn't answer, of course. Still, she finds herself waiting for a response.":
+        "طبعًا القطة ما ترد عليها، ومع ذلك تلقى نفسها تنتظر منها أي رد.",
+    "Kori reaches out to pet the cat.":
+        "كوري تمد يدها عشان تمسح على القطة.",
+    "The cat allows it, although it doesn't move closer.":
+        "القطة تخليها تمسح عليها، بس ما تقرب منها أكثر.",
+    "Kori watches the cat's tail sway.":
+        "كوري تراقب ذيل القطة وهو يتحرك.",
+    "For some reason, the sight feels strangely familiar.":
+        "لسبب ما، المنظر هذا يحسسها بشي مألوف.",
+    "The cat stands up.":
+        "القطة تقوم.",
+    "Kori isn't sure why, but she doesn't want to lose sight of it.":
+        "كوري ما تدري ليه، بس ما تبي القطة تختفي عن نظرها.",
+    "Kori stands still, listening.":
+        "كوري توقف مكانها وتحاول تسمع.",
+    "The silence around her feels almost comforting.":
+        "الهدوء اللي حولها يعطيها شعور بالراحة.",
+    "The cat suddenly runs away.":
+        "القطة فجأة تهرب.",
+    "Kori follows it before she can think about why.":
+        "كوري تلحقها قبل حتى ما تفكر ليه.",
+    "Kori blinks.":
+        "كوري ترمش.",
+    "When she opens her eyes, the cat is gone.":
+        "ولما تفتح عيونها، تكتشف إن القطة اختفت.",
+    "She is alone again.":
+        "رجعت لحالها مرة ثانية.",
+
+    "A door stands in front of you.":
+        "في باب واقف قدامك.",
+    "You don't remember it being there before.":
+        "ما تتذكرين إنه كان موجود هنا من قبل.",
+
+    "WELCOME TO HEAVEN.":
+        "أهلًا بك في الجنة.",
+    "YOU ARE NOT SUPPOSED TO REMEMBER.":
+        "مو المفروض إنك تتذكرين.",
+    "DO YOU REMEMBER HIM?":
+        "تتذكرينه؟",
+    "THE GLASS SHATTERED.":
+        "الزجاج تكسّر.",
+    "SOMEONE CALLED YOUR NAME.":
+        "أحد نادى اسمك.",
+    "HE DIDN'T MEAN TO...":
+        "هو ما كان يقصد...",
+    "WHY ARE YOU STILL HERE?":
+        "ليش للحين هنا؟",
+    "O P E N   I T":
+        "ا ف ت ح ي ه",
+
+    "You open the door.":
+        "تفتحين الباب.",
+    "The cat watches you.":
+        "القطة تطالعك.",
+    "Its tail sways slowly.":
+        "وذيلها يتحرك ببطء.",
+
+    "A figure stands before you.":
+        "في شخص واقف قدامك.",
+    "He doesn't speak. His face is difficult to make out, but tears continue to fall from his eyes.":
+        "ما يتكلم. ملامحه مو واضحة، لكن الدموع ما توقف من عيونه.",
+    "He seems to be waiting for something.":
+        "كأنه ينتظر شي.",
+    "You watch him quietly.":
+        "تراقبينه بهدوء.",
+    "He doesn't move toward you. He doesn't speak.":
+        "ما يقرب منك، ولا يتكلم.",
+    "His eyes keep weeping, as if there is something he cannot tell you.":
+        "عيونه تستمر بالبكاء، كأن فيه شي ما يقدر يقوله لك.",
+    "You try asking him questions.":
+        "تحاولين تسألينه.",
+    "Who is he? Where are you? Why is he crying?":
+        "مين هو؟ وين أنتِ؟ وليه يبكي؟",
+    "He gives you no answer. Looking closer, you realize he has no mouth at all.":
+        "ما يعطيك أي جواب. ولما تدققين فيه، تلاحظين إنه ما عنده فم أصلًا.",
+    "Only those tearful eyes.":
+        "ما عنده إلا عيونه اللي تبكي.",
+    "The figure slowly holds out his hands.":
+        "الشخص يمد يدينه لك ببطء.",
+    "He still says nothing.":
+        "وللحين ما يقول أي شي.",
+    "Will you take them?":
+        "بتمسكين يدينه؟",
+    "You take his hands.":
+        "تمسكين يدينه.",
+    "He gently leads you away. You don't know where he is taking you, but he doesn't let go.":
+        "ياخذك معه بهدوء. ما تدرين وين يوديك، لكنه ما يترك يدك.",
+    "You turn and walk away.":
+        "تلفين وتمشين بعيد عنه.",
+    "The figure doesn't stop you.":
+        "الشخص ما يحاول يوقفك.",
+    "Even after you leave, you can still feel his gaze following you.":
+        "حتى بعد ما تبتعدين، تحسين إنه للحين يطالعك.",
+
+    "The world changes around you.":
+        "العالم من حولك يتغير.",
+    "The emptiness is gone. There is ground beneath your feet, and the air feels different.":
+        "الفراغ اختفى. صار فيه أرض تحت رجولك، وحتى الهوا صار مختلف.",
+    "You have arrived somewhere very familiar.":
+        "وصلتوا لمكان تحسين إنه مألوف لك بشكل غريب.",
+    "The figure stands beside you.":
+        "الشخص واقف بجنبك.",
+
+    "\"You're free to explore, my child...\"":
+        "\"تقدرين تستكشفين المكان براحتك يا بنتي...\"",
+    "\"You speak!?\"":
+        "\"أنت تتكلم!؟\"",
+    "Kori looks up at him, startled. Until now, he hasn't said a single word.":
+        "كوري تطالع فيه باستغراب. لين هاللحظة، ما نطق ولا كلمة.",
+    "\"Of course I do... I'm an angel after all.\"":
+        "\"أكيد أتكلم... أنا ملاك بالنهاية.\"",
+    "\"Well then, what's your name?\"":
+        "\"أجل، وش اسمك؟\"",
+    "\"Gabriel...\"":
+        "\"جبرائيل...\"",
+
+    "The park is loud. Trees sway gently in the breeze, She watches as familes laugh together.":
+        "الحديقة العامة فيها أصوات وحركة. الأشجار تتحرك مع الهوا، وكوري تشوف العائلات وهم يضحكون مع بعض.",
+    "She feels sad as she watches children play together.":
+        "تحس بالحزن وهي تشوف الأطفال يلعبون مع بعض.",
+    "The garden is peaceful.":
+        "الحديقة هادية ومريحة.",
+    "Kori watches the gardener cut some overgrown roses out of their bushes.":
+        "كوري تراقب البستاني وهو يقص الورد اللي كبر وصار متشابك.",
+    "She slowly remembers how she wanted to try gardening, But, she was always too busy.":
+        "تبدأ تتذكر إنها كانت تبي تجرب الزراعة، بس دايم كانت مشغولة.",
+    "The library is filled with shelves of books.":
+        "المكتبة مليانة رفوف كتب.",
+    "Kori feels strangely drawn to them. She doesn't remember what she used to read, but the sight of all those books feels familiar.":
+        "كوري تحس إنها منجذبة للكتب بشكل غريب. ما تتذكر وش كانت تقرأ، بس منظر الكتب مألوف لها.",
+
+    "Gabriel waits nearby while Kori looks around.":
+        "جبرائيل ينتظر قريب منها وهي تطالع حولها.",
+    "Where would you like to go?":
+        "وين ودك تروحين؟",
+    "After Kori finishes exploring, Gabriel approaches her.":
+        "بعد ما تخلص كوري استكشاف، جبرائيل يقرب منها.",
+    "\"Kori, there's somewhere else I'd like to show you. It's a little far from here. Will you come with me?\"":
+        "\"يا كوري، فيه مكان ثاني ودي أوريك إياه. بعيد شوي من هنا. تجين معي؟\"",
+
+    "Kori decides to stay.":
+        "كوري تقرر إنها تبقى.",
+    "Gabriel looks at her for a moment. His eyes still weep, but he doesn't try to change her mind.":
+        "جبرائيل يطالعها للحظة. عيونه للحين تبكي، لكنه ما يحاول يغيّر رأيها.",
+    "He understands.":
+        "هو متفهم قرارها.",
+    "He lets her remain where she feels safe, then quietly leaves her to the peace she has chosen.":
+        "يخليها تبقى بالمكان اللي تحس فيه بالأمان، ويتركها بهدوء تعيش السلام اللي اختارته.",
+    "For once, nobody asks anything more of Kori.":
+        "لأول مرة، ما فيه أحد يطلب من كوري أي شي.",
+    "The world grows quiet.":
+        "العالم يصير هادي.",
+
+    "Kori follows Gabriel.":
+        "كوري تمشي مع جبرائيل.",
+    "Neither of them says much as they walk. The farther they go, the quieter the world seems to become.":
+        "ولا واحد فيهم يتكلم كثير وهم يمشون. وكل ما ابتعدوا، صار العالم أهدأ.",
+    "The two of you arrive at a graveyard.":
+        "توصلون أنتم الاثنين لمقبرة.",
+    "Kori slows down. She doesn't understand why Gabriel has brought her here.":
+        "كوري تخفف مشيها. مو فاهمة ليه جبرائيل جابها لهنا.",
+    "He stands beside her, his eyes still full of tears.":
+        "يوقف بجنبها، وعيونه للحين مليانة دموع.",
+    "\"Kori...\"":
+        "\"كوري...\"",
+
+    "Kori looks down at the gravestone in front of her.":
+        "كوري تطالع شاهد القبر اللي قدامها.",
+    "Her name is carved into it.":
+        "اسمها محفور عليه.",
+    "She stares at the letters. They belong to her. She knows they do.":
+        "تطالع الحروف. هذا اسمها، وهي متأكدة من هالشي.",
+    "But why would her name be here?":
+        "بس ليه اسمها موجود هنا؟",
+    "Fragments of a memory begin to return.":
+        "تبدأ أجزاء من ذكرياتها ترجع لها.",
+    "A familiar room.\nThe sound of glass breaking.\nA moment she had tried to forget.":
+        "غرفة تعرفها.\nصوت زجاج يتكسر.\nذكرى حاولت تنساها.",
+    "Your older brother.":
+        "أخوها الكبير.",
+    "What happened that day finally comes back to you.":
+        "أخيرًا، تتذكر وش صار لها في ذاك اليوم.",
+    "You were never going to return home.":
+        "ما كان فيه رجعة للبيت.",
+    "You have been gone all this time.":
+        "أنتِ رحتي من زمان، وكل هالوقت ما كنتِ موجودة.",
+
+    "Gabriel gently rests a hand on Kori's back.":
+        "جبرائيل يحط يده برفق على ظهر كوري.",
+    "Kori doesn't know how long she's been crying. Minutes? Hours? She can't tell anymore. Everything she'd just remembered keeps replaying in her head, and she doesn't know what to do with any of it.":
+        "كوري ما تدري من متى وهي تبكي. دقايق؟ ساعات؟ ما عادت تقدر تميّز. كل اللي تذكرته قبل شوي يعيد نفسه براسها، وهي مو عارفة وش تسوي بكل هالمشاعر.",
+    "Gabriel doesn't say anything. He doesn't try to make her feel better with words he knows won't be enough. He just stays.":
+        "جبرائيل ما يقول شي. ما يحاول يواسيها بكلام يعرف إنه ما راح يكفي. بس يبقى معها.",
+    "Eventually, Kori's tears begin to slow. Her breathing settles, and the silence around them becomes easier to bear.":
+        "وبعد وقت طويل، يبدأ بكاء كوري يخف. ترجع أنفاسها تهدأ، ويصير الصمت اللي حولهم أهون عليها.",
+    "She wipes her face and finally looks up.":
+        "تمسح وجهها وأخيرًا ترفع راسها.",
+    "Gabriel is still there.":
+        "جبرائيل للحين موجود.",
+    "He hasn't left. Not once.":
+        "ما راح وتركها. ولا مرة.",
+    "Kori looks at him for a moment, her eyes still sore from crying. She doesn't know what to say, so she doesn't say anything.":
+        "كوري تطالعه للحظة، وعيونها للحين متعبة من البكاء. ما تعرف وش تقول، فتسكت.",
+    "For now, it's enough that someone stayed.":
+        "حاليًا، يكفيها إن فيه أحد بقى معها."
+};
+
+const chapterElement = document.getElementById("chapter");
+const titleElement = document.getElementById("title");
+const storyText = document.getElementById("story-text");
+const choicesElement = document.getElementById("choices");
+const sceneImage = document.getElementById("scene-image");
+const imageError = document.getElementById("image-error");
+const languageToggle = document.getElementById("language-toggle");
+const footer = document.getElementById("footer");
+
+let sceneTimers = [];
+let currentScene = 0;
+let visitedLocations = [];
+let currentStoryText = "";
+let currentChapter = "A STORY";
+let currentTitle = "Kori's Story";
+let currentOptions = [];
+let currentEnding = null;
+let currentImageFilename = "";
+
+const MAX_LOCATIONS = 2;
+
+function translateOne(text) {
+    if (language === "en") return text;
+
+    const placesMatch = text.match(/^Places left to visit:\s*(\d+)$/);
+    if (placesMatch) {
+        return "الأماكن اللي باقي تزورينها: " + placesMatch[1];
+    }
+
+    return arabic[text] || text;
+}
+
+function translateText(text) {
+    if (language === "en") return text;
+
+    return text.split("\n\n").map(paragraph => {
+        if (arabic[paragraph]) return arabic[paragraph];
+
+        return paragraph.split("\n")
+            .map(line => translateOne(line))
+            .join("\n");
+    }).join("\n\n");
+}
+
+function toggleLanguage() {
+    language = language === "en" ? "ar" : "en";
+
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    document.body.classList.toggle("arabic", language === "ar");
+
+    languageToggle.textContent = language === "en" ? "العربية" : "English";
+    footer.textContent = language === "ar" ? "قصة كوري" : "KORI'S STORY";
+
+    renderChapter();
+    renderStoryText();
+    renderChoices();
+
+    if (imageError.style.display === "block" && currentImageFilename) {
+        showImageError(currentImageFilename);
+    }
+}
+
+function renderChapter() {
+    chapterElement.textContent = translateOne(currentChapter);
+    titleElement.textContent = translateOne(currentTitle);
+}
+
+function renderStoryText() {
+    storyText.textContent = translateText(currentStoryText);
+}
+
+function renderChoices() {
+    choicesElement.replaceChildren();
+
+    currentOptions.forEach(option => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = translateOne(option.label);
+
+        button.addEventListener("click", () => {
+            clearChoices();
+            clearSceneTimers();
+            currentScene++;
+            option.action();
+        });
+
+        choicesElement.appendChild(button);
+    });
+
+    if (currentEnding) {
+        const endingTitle = document.createElement("h2");
+        endingTitle.textContent = translateOne(currentEnding);
+        endingTitle.style.fontWeight = "normal";
+        endingTitle.style.letterSpacing = language === "ar" ? "0" : "4px";
+        endingTitle.style.fontSize = "15px";
+        endingTitle.style.marginTop = "28px";
+        choicesElement.appendChild(endingTitle);
+
+        const restartButton = document.createElement("button");
+        restartButton.type = "button";
+        restartButton.textContent = language === "ar" ? "ابدئي من جديد" : "Start over";
+        restartButton.addEventListener("click", startGame);
+        choicesElement.appendChild(restartButton);
+    }
+}
+
+function clearSceneTimers() {
+    sceneTimers.forEach(timer => clearTimeout(timer));
+    sceneTimers = [];
+}
+
+function later(callback, delay) {
+    const timer = setTimeout(() => {
+        sceneTimers = sceneTimers.filter(item => item !== timer);
+        callback();
+    }, delay);
+
+    sceneTimers.push(timer);
+    return timer;
+}
+
+function clearChoices() {
+    currentOptions = [];
+    currentEnding = null;
+    choicesElement.replaceChildren();
+}
+
+function setChoices(options) {
+    currentEnding = null;
+    currentOptions = options;
+    renderChoices();
+}
+
+function setText(text) {
+    currentStoryText = text;
+    renderStoryText();
+}
+
+function setChapter(chapter, title) {
+    currentChapter = chapter;
+    currentTitle = title;
+    renderChapter();
+}
+
+function resetAppearance() {
+    document.body.classList.remove("corrupted", "glitch", "gloomy");
+}
+
+function showImageError(filename) {
+    imageError.style.display = "block";
+    imageError.textContent = language === "ar"
+        ? "ما قدرنا نحمّل الصورة " + filename +
+          ". تأكدي إنها موجودة بنفس مجلد index.html وإن اسم الملف صحيح."
+        : "Couldn't load " + filename +
+          ". Check that the GIF is in the same folder as index.html " +
+          "and that its filename matches exactly.";
+}
+
+function showImage(filename, alt = "") {
+    currentImageFilename = filename || "";
+
+    sceneImage.onload = null;
+    sceneImage.onerror = null;
+    sceneImage.hidden = true;
+    sceneImage.removeAttribute("src");
+    sceneImage.alt = alt;
+
+    imageError.style.display = "none";
+    imageError.textContent = "";
+
+    if (!filename) return;
+
+    sceneImage.onerror = () => {
+        sceneImage.hidden = true;
+        showImageError(filename);
+    };
+
+    sceneImage.onload = () => {
+        sceneImage.hidden = false;
+        imageError.style.display = "none";
+    };
+
+    sceneImage.src = filename;
+}
+
+function scene(filename, text, choices, alt = "") {
+    clearSceneTimers();
+    showImage(filename, alt);
+    setText(text);
+    setChoices(choices);
+}
+
+function continueScene(filename, text, callback, alt = "") {
+    scene(filename, text, [
+        { label: "Continue", action: callback }
+    ], alt);
+}
+
+/* ACT 1 — THE CAT */
+
+function startGame() {
+    clearSceneTimers();
+    clearChoices();
+    resetAppearance();
+
+    setChapter("A STORY", "Kori's Story");
+    showImage("", "");
+
+    setText(
+        "A girl stands in a place where nothing exists.\n\n" +
+        "She doesn't know how she got here.\n\n" +
+        "She doesn't remember anything at all.\n\n" +
+        "What should she do?"
+    );
+
+    setChoices([
+        { label: "Look around", action: () => meetCat("look") },
+        { label: "Call out to someone", action: () => meetCat("call") },
+        { label: "Try to move around", action: () => meetCat("move") }
+    ]);
+}
+
+function meetCat(choice) {
+    setChapter("ACT 1", "The Void");
+
+    let text;
+
+    if (choice === "look") {
+        text =
+            "Kori looks around.\n\n" +
+            "There is nothing. No walls, no floor she can see, and no sign of another person.\n\n" +
+            "Then, something catches her attention.";
+    } else if (choice === "call") {
+        text =
+            "Kori calls out into the emptiness.\n\n" +
+            "No one answers.\n\n" +
+            "For a moment, she thinks she hears something nearby.";
+    } else {
+        text =
+            "Kori tries to move through the empty space.\n\n" +
+            "She doesn't know where she is going.\n\n" +
+            "Then, she notices something in the distance.";
+    }
+
+    continueScene(
+        "cat.gif",
+        text + "\n\nA black cat sits quietly in front of her.",
+        catChoices,
+        "A black cat sitting in the void"
+    );
+}
+
+function catChoices() {
+    setChapter("ACT 1", "A Familiar Stranger");
+
+    setText(
+        "The cat looks at Kori.\n\n" +
+        "It doesn't seem frightened of her. It simply sits there, watching."
+    );
+
+    setChoices([
+        { label: "Speak to the cat", action: () => catInteraction("speak") },
+        { label: "Pet the cat", action: () => catInteraction("pet") },
+        { label: "Watch its tail wag", action: () => catInteraction("wagging") }
+    ]);
+}
+
+function catInteraction(choice) {
+    const scenes = {
+        speak: {
+            image: "speak.gif",
+            text: "Kori tries speaking to the cat.\n\nIt doesn't answer, of course. Still, she finds herself waiting for a response."
+        },
+        pet: {
+            image: "pet.gif",
+            text: "Kori reaches out to pet the cat.\n\nThe cat allows it, although it doesn't move closer."
+        },
+        wagging: {
+            image: "wagging.gif",
+            text: "Kori watches the cat's tail sway.\n\nFor some reason, the sight feels strangely familiar."
+        }
+    };
+
+    const selected = scenes[choice];
+
+    continueScene(
+        selected.image,
+        selected.text,
+        nextCatChoices,
+        "Kori interacting with the black cat"
+    );
+}
+
+function nextCatChoices() {
+    setChapter("ACT 1", "Something Feels Familiar");
+
+    setText(
+        "The cat stands up.\n\n" +
+        "Kori isn't sure why, but she doesn't want to lose sight of it."
+    );
+
+    setChoices([
+        { label: "Stand still and listen", action: () => catEndingChoice("still") },
+        { label: "Chase after the cat", action: () => catEndingChoice("runsaway") },
+        { label: "Blink", action: () => catEndingChoice("blink") }
+    ]);
+}
+
+function catEndingChoice(choice) {
+    const scenes = {
+        still: {
+            image: "still.gif",
+            text: "Kori stands still, listening.\n\nThe silence around her feels almost comforting."
+        },
+        runsaway: {
+            image: "runsaway.gif",
+            text: "The cat suddenly runs away.\n\nKori follows it before she can think about why."
+        },
+        blink: {
+            image: "blink.gif",
+            text: "Kori blinks.\n\nWhen she opens her eyes, the cat is gone.\n\nShe is alone again."
+        }
+    };
+
+    const selected = scenes[choice];
+
+    continueScene(
+        selected.image,
+        selected.text,
+        startAct2,
+        "Kori's encounter with the cat"
+    );
+}
+
+/* ACT 2 — THE DOOR */
+
+function startAct2() {
+    clearSceneTimers();
+    resetAppearance();
+    setChapter("ACT 2", "The Door");
+
+    scene(
+        "Door.gif",
+        "A door stands in front of you.\n\nYou don't remember it being there before.",
+        [{ label: "Approach the door", action: beginCorruption }],
+        "A mysterious door"
+    );
+}
+
+function beginCorruption() {
+    clearSceneTimers();
+    document.body.classList.add("corrupted", "glitch");
+
+    const messages = [
+        "WELCOME TO HEAVEN.",
+        "YOU ARE NOT SUPPOSED TO REMEMBER.",
+        "DO YOU REMEMBER HIM?",
+        "THE GLASS SHATTERED.",
+        "SOMEONE CALLED YOUR NAME.",
+        "HE DIDN'T MEAN TO...",
+        "WHY ARE YOU STILL HERE?",
+        "WELCOME TO HEAVEN."
+    ];
+
+    let index = 0;
+    showImage("", "");
+    setText("");
+
+    function showNextMessage() {
+        if (index >= messages.length) {
+            document.body.classList.remove("glitch");
+            setText("O P E N   I T");
+
+            setChoices([
+                { label: "Open the door", action: openDoor }
+            ]);
+            return;
+        }
+
+        setText(messages[index]);
+        index++;
+        later(showNextMessage, 850);
+    }
+
+    showNextMessage();
+}
+
+function openDoor() {
+    clearSceneTimers();
+
+    scene("open.gif", "You open the door.", [], "The door opening");
+
+    later(() => {
+        scene(
+            "wag2.gif",
+            "The cat watches you.\n\nIts tail sways slowly.",
+            [],
+            "The black cat waiting beyond the door"
+        );
+
+        later(showGabriel, 2500);
+    }, 1600);
+}
+
+function showGabriel() {
+    setChapter("ACT 2", "A Weeping Figure");
+
+    scene(
+        "child.gif",
+        "A figure stands before you.\n\n" +
+        "He doesn't speak. His face is difficult to make out, but tears continue to fall from his eyes.\n\n" +
+        "He seems to be waiting for something.",
+        [
+            { label: "Watch him quietly", action: observeGabriel },
+            { label: "Try asking him questions", action: askGabriel }
+        ],
+        "A weeping figure standing in the darkness"
+    );
+}
+
+function observeGabriel() {
+    continueScene(
+        "tears.gif",
+        "You watch him quietly.\n\n" +
+        "He doesn't move toward you. He doesn't speak.\n\n" +
+        "His eyes keep weeping, as if there is something he cannot tell you.",
+        showHandsScene,
+        "The figure's tearful eyes"
+    );
+}
+
+function askGabriel() {
+    continueScene(
+        "answers.gif",
+        "You try asking him questions.\n\n" +
+        "Who is he? Where are you? Why is he crying?\n\n" +
+        "He gives you no answer. Looking closer, you realize he has no mouth at all.\n\n" +
+        "Only those tearful eyes.",
+        showHandsScene,
+        "The silent figure"
+    );
+}
+
+function showHandsScene() {
+    setChapter("ACT 2", "An Offer");
+
+    scene(
+        "hands.gif",
+        "The figure slowly holds out his hands.\n\n" +
+        "He still says nothing.\n\nWill you take them?",
+        [
+            { label: "Take his hands", action: takeHands },
+            { label: "Walk away", action: refuseHands }
+        ],
+        "The figure holding out his hands"
+    );
+}
+
+function takeHands() {
+    continueScene(
+        "walking.gif",
+        "You take his hands.\n\n" +
+        "He gently leads you away. You don't know where he is taking you, but he doesn't let go.",
+        startAct3,
+        "Kori walking with the silent figure"
+    );
+}
+
+function refuseHands() {
+    continueScene(
+        "walk away.gif",
+        "You turn and walk away.\n\n" +
+        "The figure doesn't stop you.\n\n" +
+        "Even after you leave, you can still feel his gaze following you.",
+        startAct3,
+        "Kori walking away"
+    );
+}
+
+/* ACT 3 — EARTH */
+
+function startAct3() {
+    clearSceneTimers();
+    resetAppearance();
+    setChapter("ACT 3", "Somewhere Familiar");
+
+    continueScene(
+        "earth.gif",
+        "The world changes around you.\n\n" +
+        "The emptiness is gone. There is ground beneath your feet, and the air feels different.\n\n" +
+        "You have arrived somewhere very familiar.\n\n" +
+        "The figure stands beside you.",
+        earthDialogue1,
+        "Kori and Gabriel arriving on Earth"
+    );
+}
+
+/* Dialogue is kept natural: no character-name labels. */
+
+function earthDialogue1() {
+    continueScene(
+        "earth.gif",
+        '"You\'re free to explore, my child..."',
+        earthDialogue2,
+        "Kori and Gabriel on Earth"
+    );
+}
+
+function earthDialogue2() {
+    continueScene(
+        "earth.gif",
+        '"You speak!?"\n\n' +
+        "Kori looks up at him, startled. Until now, he hasn't said a single word.",
+        earthDialogue3,
+        "Kori reacting to Gabriel"
+    );
+}
+
+function earthDialogue3() {
+    continueScene(
+        "earth.gif",
+        '"Of course I do... I\'m an angel after all."',
+        earthDialogue4,
+        "Gabriel speaking to Kori"
+    );
+}
+
+function earthDialogue4() {
+    continueScene(
+        "earth.gif",
+        '"Well then, what\'s your name?"',
+        earthDialogue5,
+        "Kori asking Gabriel a question"
+    );
+}
+
+function earthDialogue5() {
+    continueScene(
+        "earth.gif",
+        '"Gabriel..."',
+        startExploration,
+        "Gabriel introducing himself"
+    );
+}
+
+/* EXPLORATION */
+
+const locations = [
+    {
+        id: "park",
+        label: "Visit the park",
+        image: "park.gif",
+        description:
+            "The park is loud. Trees sway gently in the breeze, She watches as familes laugh together.\n\n" +
+            "She feels sad as she watches children play together."
+    },
+    {
+        id: "garden",
+        label: "Visit the garden",
+        image: "garden.gif",
+        description:
+            "The garden is peaceful.\n\n" +
+            "Kori watches the gardener cut some overgrown roses out of their bushes. " +
+            "She slowly remembers how she wanted to try gardening, But, she was always too busy."
+    },
+    {
+        id: "library",
+        label: "Visit the library",
+        image: "library.gif",
+        description:
+            "The library is filled with shelves of books.\n\n" +
+            "Kori feels strangely drawn to them. She doesn't remember what she used to read, but the sight of all those books feels familiar."
+    }
+];
+
+function startExploration() {
+    visitedLocations = [];
+    chooseLocation();
+}
+
+function chooseLocation() {
+    setChapter("ACT 3", "Explore");
+
+    if (visitedLocations.length >= MAX_LOCATIONS) {
+        askGabrielToFollow();
+        return;
+    }
+
+    const remaining = MAX_LOCATIONS - visitedLocations.length;
+
+    setText(
+        "Gabriel waits nearby while Kori looks around.\n\n" +
+        "Where would you like to go?\n\n" +
+        "Places left to visit: " + remaining
+    );
+
+    const availableLocations = locations.filter(
+        place => !visitedLocations.includes(place.id)
+    );
+
+    setChoices(availableLocations.map(place => ({
+        label: place.label,
+        action: () => visitLocation(place)
+    })));
+}
+
+function visitLocation(place) {
+    if (visitedLocations.includes(place.id)) {
+        chooseLocation();
+        return;
+    }
+
+    visitedLocations.push(place.id);
+
+    continueScene(
+        place.image,
+        place.description,
+        chooseLocation,
+        place.label
+    );
+}
+
+/* GABRIEL'S REQUEST */
+
+function askGabrielToFollow() {
+    setChapter("ACT 3", "One More Place");
+
+    scene(
+        "a place.gif",
+        "After Kori finishes exploring, Gabriel approaches her.\n\n" +
+        '"Kori, there\'s somewhere else I\'d like to show you. ' +
+        'It\'s a little far from here. Will you come with me?"',
+        [
+            { label: "Go with him", action: goWithGabriel },
+            { label: "Stay here", action: stayHere }
+        ],
+        "Gabriel asking Kori to follow him"
+    );
+}
+
+function stayHere() {
+    clearSceneTimers();
+    setChapter("ENDING 1", "Peace");
+
+    scene(
+        "stay here.gif",
+        "Kori decides to stay.\n\n" +
+        "Gabriel looks at her for a moment. His eyes still weep, but he doesn't try to change her mind.\n\n" +
+        "He understands.\n\n" +
+        "He lets her remain where she feels safe, then quietly leaves her to the peace she has chosen.\n\n" +
+        "For once, nobody asks anything more of Kori.\n\n" +
+        "The world grows quiet.",
+        [],
+        "Kori choosing to stay behind"
+    );
+
+    showEnding("ENDING 1: PEACE");
+}
+
+function goWithGabriel() {
+    continueScene(
+        "go with him.gif",
+        "Kori follows Gabriel.\n\n" +
+        "Neither of them says much as they walk. The farther they go, the quieter the world seems to become.",
+        findTheTruth,
+        "Kori walking with Gabriel"
+    );
+}
+
+/* THE GRAVEYARD */
+
+function findTheTruth() {
+    clearSceneTimers();
+    document.body.classList.add("gloomy");
+    setChapter("ACT 3", "A Place to Remember");
+
+    continueScene(
+        "the truth.gif",
+        "The two of you arrive at a graveyard.\n\n" +
+        "Kori slows down. She doesn't understand why Gabriel has brought her here.\n\n" +
+        "He stands beside her, his eyes still full of tears.\n\n" +
+        '"Kori..."',
+        readGravestone,
+        "Kori and Gabriel standing in a graveyard"
+    );
+}
+
+function readGravestone() {
+    continueScene(
+        "the truth.gif",
+        "Kori looks down at the gravestone in front of her.\n\n" +
+        "Her name is carved into it.\n\n" +
+        "She stares at the letters. They belong to her. She knows they do.\n\n" +
+        "But why would her name be here?",
+        rememberTheTruth,
+        "Kori looking at her gravestone"
+    );
+}
+
+function rememberTheTruth() {
+    continueScene(
+        "the truth.gif",
+        "Fragments of a memory begin to return.\n\n" +
+        "A familiar room.\nThe sound of glass breaking.\nA moment she had tried to forget.\n\n" +
+        "Your older brother.\n\n" +
+        "What happened that day finally comes back to you.\n\n" +
+        "You were never going to return home.\n\n" +
+        "You have been gone all this time.",
+        gabrielComfortsKori,
+        "Kori remembering the truth"
+    );
+}
+
+/* ENDING 2 — THE TRUTH */
+
+function gabrielComfortsKori() {
+    clearSceneTimers();
+    setChapter("ENDING 2", "The Truth");
+
+    scene(
+        "the end.gif",
+        "Gabriel gently rests a hand on Kori's back.\n\n" +
+        "Kori doesn't know how long she's been crying. Minutes? Hours? She can't tell anymore. Everything she'd just remembered keeps replaying in her head, and she doesn't know what to do with any of it.\n\n" +
+        "Gabriel doesn't say anything. He doesn't try to make her feel better with words he knows won't be enough. He just stays.\n\n" +
+        "Eventually, Kori's tears begin to slow. Her breathing settles, and the silence around them becomes easier to bear.\n\n" +
+        "She wipes her face and finally looks up.\n\n" +
+        "Gabriel is still there.\n\n" +
+        "He hasn't left. Not once.\n\n" +
+        "Kori looks at him for a moment, her eyes still sore from crying. She doesn't know what to say, so she doesn't say anything.\n\n" +
+        "For now, it's enough that someone stayed.",
+        [],
+        "Gabriel comforting Kori"
+    );
+
+    showEnding("ENDING 2: THE TRUTH");
+}
+
+/* ENDING SCREEN */
+
+function showEnding(endingName) {
+    currentEnding = endingName;
+    renderChoices();
+}
+
+startGame();
+</script>
+</body>
+</html>
